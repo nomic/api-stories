@@ -1,6 +1,6 @@
 {
   "name": "api-stories",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "\"JSON API testing without the fuss\"",
   "keywords": [
     "testing",
