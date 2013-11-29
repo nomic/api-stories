@@ -1,7 +1,12 @@
 {
   "name": "api-stories",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "\"JSON API testing without the fuss\"",
+  "keywords": [
+    "testing",
+    "api",
+    "json"
+  ],
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -9,19 +14,17 @@
   "dependencies": {
     "api-driver": "nomic/api-driver",
   },
-
   "repository": {
     "type": "git",
     "url": "https://github.com/nomic/api-stories.git"
   },
   "bin" : {
     "stories": "./index.js"
-  }
-  "keywords": [
-    "testing",
-    "api",
-    "json"
-  ],
+  },
   "author": "Aaron Boyd",
-  "license": "MIT"
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/nomic/api-driver/issues"
+  },
+  "homepage": "https://github.com/nomic/api-driver"
 }
