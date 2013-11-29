@@ -7,6 +7,9 @@
     "api",
     "json"
   ],
+  "dependencies": {
+    "api-driver": "nomic/api-driver"
+  },
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
