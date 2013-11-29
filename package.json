@@ -12,7 +12,7 @@
 
   "repository": {
     "type": "git",
-    "url": "https://github.com/nomic/stories.git"
+    "url": "https://github.com/nomic/api-stories.git"
   },
   "bin" : {
     "stories": "./index.js"
