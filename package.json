@@ -1,0 +1,24 @@
+{
+  "name": "api-stories",
+  "version": "0.0.0",
+  "description": "\"JSON API testing without the fuss\"",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "api-driver": "nomic/api-driver",
+  },
+
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nomic/stories.git"
+  },
+  "keywords": [
+    "testing",
+    "api",
+    "json"
+  ],
+  "author": "Aaron Boyd",
+  "license": "MIT"
+}
