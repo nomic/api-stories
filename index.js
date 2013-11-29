@@ -352,6 +352,7 @@ module.exports.suite = module.exports.topic;
 module.exports.beforeEach = module.exports.beforeEachPath;
 module.exports.afterEach = module.exports.afterEachPath;
 module.exports.expectations = require("api-driver/expectations");
+module.exports.driverApi = require("api-driver").api;
 
 
 if (! module.parent) {
