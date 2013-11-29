@@ -11,7 +11,7 @@ var path = require("path"),
 
 
 var apiDriver = require("api-driver"),
-    reporter_ = require("./reporter");
+    reporter_ = require("./lib/reporter");
 
 
 var topics = [];
