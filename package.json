@@ -11,9 +11,6 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "dependencies": {
-    "api-driver": "nomic/api-driver",
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/nomic/api-stories.git"
