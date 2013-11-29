@@ -14,6 +14,9 @@
     "type": "git",
     "url": "https://github.com/nomic/stories.git"
   },
+  "bin" : {
+    "stories": "./stories.js"
+  }
   "keywords": [
     "testing",
     "api",
