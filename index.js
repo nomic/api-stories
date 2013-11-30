@@ -6,8 +6,7 @@ var path = require("path"),
     _ = require("underscore"),
     assert = require("assert"),
     fs = require("fs"),
-    pth = require("path"),
-    sys = require("sys");
+    pth = require("path");
 
 
 var apiDriver = require("api-driver"),
@@ -32,7 +31,6 @@ var Topic = function(description) {
 
 
 var depthFirst = function(step) {
-    var visited = [];
     var paths = [];
 
     var _depthFirst = function(step, path) {
