@@ -31,5 +31,5 @@
     "minimatch": "0.2.12",
     "request": "2.26.0",
     "underscore": "1.5.1"
-  },
+  }
 }
