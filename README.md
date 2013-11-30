@@ -172,9 +172,11 @@ available.  An operation just waits until the stashed result has been fulfilled.
 
 * The default behavior is to check that the response has *at least* the specified values,
   i.e. the expectation does not need to include all of the responses values
-* $unordered: Replace an [1,2,3] with {$unordered: [1, 2, 3]} if order may very
+* $unordered: Replace an [1,2,3] with {$unordered: [1, 2, 3]} if you do not care about the order of the result
 * $length: Replace [1,2,3] with {$length: 3} if all you care about is length
 * {key: "$not-exists"} is {key: "$exists"{: insure the specified field is not present or is present
+* $int: require any integer
+* $date: require any iso date
 * $whatsNext?: let's add more $modifiers as we need them to make comparisons powerful!
 * Check out expector.js (inside the source tree) to find all the special '$' keywords.
 
