@@ -384,17 +384,17 @@ if (! module.parent) {
     program
         .version("0.0.1")
         .usage("[options] <configfile> <storyfiles...>")
-        .option("-t, --topics <patterns,...>",
-                "only run topics that match the fnmatch pattern",
+        .option("-s, --suites <patterns,...>",
+                "only run suites that match the fnmatch pattern",
                 patterns)
-        .option("-T, --not-topics <patterns,...>",
-                "only run topics that do not match the fnmatch pattern",
+        .option("-S, --not-suites <patterns,...>",
+                "only run suites that do not match the fnmatch pattern",
                 inversePatterns)
-        .option("-s, --stories <patterns,...>",
-                "only run stories that match the fnmatch pattern",
+        .option("-t, --test <patterns,...>",
+                "only run tests that match the fnmatch pattern",
                 patterns)
-        .option("-S, --not-stories <patterns,...>",
-                "only run stories that do not match the fnmatch pattern",
+        .option("-T, --not-tests <patterns,...>",
+                "only run tests that do not match the fnmatch pattern",
                 inversePatterns)
         .option("-p, --paths <patterns,...>",
                 "only run paths that match the fnmatch pattern",
@@ -422,8 +422,8 @@ if (! module.parent) {
         process.exit(1);
     }
 
-    program.topics = program.topics || program.notTopics;
-    program.stories = program.stories || program.notStories;
+    program.topics = program.suites || program.notSuites;
+    program.stories = program.tests || program.notTests;
     program.paths = program.paths || program.notPaths;
 
     var logRight = function(msg) {
