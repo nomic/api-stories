@@ -94,17 +94,17 @@ suite("Invites", function() {
 
             driver
             .introduce("sender")  //create a session (cookie jar) we'll refer to as "sender"
-            .POST("/invites")
+            .POST("/invites", {to: "harry"})
             .stash("invite")
-            .expect(200, {to: "1234"});
+            .expect(200, {to: "harry"});
         }),
 
         step("Receive invite", function(driver) {
 
             driver
             .introduce("recipient")
-            .GET("/invites/to/1234")
-            .expect(200, {code: "$exists", to: "1234"})
+            .GET("/invites/to/:invite.to")
+            .expect(200, {code: "$exists", to: ":invite.to"})
             .stash("invite");
 
         }),
