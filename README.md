@@ -56,7 +56,7 @@ $ ./stories --help
 ### An example invocation
 
 ```bash
-$ ./stories api_tests/stories/topics/*
+$ stories tests/*
 ```
 
 ## A Simple Example
@@ -86,7 +86,7 @@ suite("Invites", function() {
 // invites.js
 // Note that steps can contain more steps, and nest as deeply as you like
 
-topic("Invites", function() {
+suite("Invites", function() {
 
     test("Send an invite and respond to it",
 
