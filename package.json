@@ -7,9 +7,6 @@
     "api",
     "json"
   ],
-  "dependencies": {
-    "api-driver": "nomic/api-driver"
-  },
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -26,5 +23,13 @@
   "bugs": {
     "url": "https://github.com/nomic/api-stories/issues"
   },
-  "homepage": "https://github.com/nomic/api-stories"
+  "homepage": "https://github.com/nomic/api-stories",
+  "dependencies": {
+    "async": "0.2.9",
+    "api-driver": "nomic/api-driver",
+    "commander": "2.0.0",
+    "minimatch": "0.2.12",
+    "request": "2.26.0",
+    "underscore": "1.5.1"
+  },
 }
