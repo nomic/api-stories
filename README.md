@@ -1,6 +1,6 @@
 # stories.js
 
-A concise way to test your JSON API.
+JSON API testing without the fuss.
 
 ## How is stories.js different from other testing frameworks.
 
