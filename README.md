@@ -164,7 +164,9 @@ You can stash only part of a result if you like:
 Anything you've stashed can be retrieved by passing in a name preceded by a ":".  You can also
 destash a nested attribute like this: ```":invite.code"```.
 
-The stash is also a declarative way to ensure that an operation does not run until some result it needs is
+You can use these ":" names in urls as well, request bodies, and expectations.
+
+The stash is also a nice way to ensure that an operation does not run until some result it needs is
 available.  An operation just waits until the stashed result has been fulfilled.
 
 
