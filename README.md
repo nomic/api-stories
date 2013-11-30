@@ -178,7 +178,7 @@ available.  An operation just waits until the stashed result has been fulfilled.
 * $int: require any integer
 * $date: require any iso date
 * $whatsNext?: let's add more $modifiers as we need them to make comparisons powerful!
-* Check out expector.js (inside the source tree) to find all the special '$' keywords.
+* Check out [expector.js](https://github.com/nomic/api-driver/blob/master/lib/expector.js) to find all the special '$' keywords.
 
 ### Until
 
