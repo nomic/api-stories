@@ -176,6 +176,7 @@ available.  An operation just waits until the stashed result has been fulfilled.
 * $length: Replace [1,2,3] with {$length: 3} if all you care about is length
 * {key: "$not-exists"} is {key: "$exists"{: insure the specified field is not present or is present
 * $whatsNext?: let's add more $modifiers as we need them to make comparisons powerful!
+* Check out expector.js (inside the source tree) to find all the special '$' keywords.
 
 ### Until
 
