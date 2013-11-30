@@ -5,8 +5,8 @@ A concise way to test your JSON API.
 ## How is stories.js different from other testing frameworks.
 
 Similar to other automated test harnesses, stories allows you to break your tests up using
-the <code>suite</code> and <code>test</code> key words.  But stories adds two more key words:
-<step> and <branch>.
+the ```suite``` and ```test``` key words.  But stories adds two more key words:
+```step``` and ```branch```.
 
 Stories.js is inspired by how use cases are structured (though there is no attempt to simulate the
 english language here!) and is made for higher level integration tests, in particular tests
