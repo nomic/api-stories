@@ -1,12 +1,12 @@
 # stories.js
 
-A concise way to test your JSON API.
+JSON API testing without the fuss.
 
 ## How is stories.js different from other testing frameworks.
 
 Similar to other automated test harnesses, stories allows you to break your tests up using
-the <code>suite</code> and <code>test</code> key words.  But stories adds two more key words:
-<step> and <branch>.
+the ```suite``` and ```test``` key words.  But stories adds two more key words:
+```step``` and ```branch```.
 
 Stories.js is inspired by how use cases are structured (though there is no attempt to simulate the
 english language here!) and is made for higher level integration tests, in particular tests
@@ -56,7 +56,7 @@ $ ./stories --help
 ### An example invocation
 
 ```bash
-$ ./stories api_tests/stories/topics/*
+$ stories tests/*
 ```
 
 ## A Simple Example
@@ -86,7 +86,7 @@ suite("Invites", function() {
 // invites.js
 // Note that steps can contain more steps, and nest as deeply as you like
 
-topic("Invites", function() {
+suite("Invites", function() {
 
     test("Send an invite and respond to it",
 
@@ -94,17 +94,17 @@ topic("Invites", function() {
 
             driver
             .introduce("sender")  //create a session (cookie jar) we'll refer to as "sender"
-            .POST("/invites")
+            .POST("/invites", {to: "harry"})
             .stash("invite")
-            .expect(200, {to: "1234"});
+            .expect(200, {to: "harry"});
         }),
 
         step("Receive invite", function(driver) {
 
             driver
             .introduce("recipient")
-            .GET("/invites/to/1234")
-            .expect(200, {code: "$exists", to: "1234"})
+            .GET("/invites/to/:invite.to")
+            .expect(200, {code: "$exists", to: ":invite.to"})
             .stash("invite");
 
         }),
@@ -164,7 +164,9 @@ You can stash only part of a result if you like:
 Anything you've stashed can be retrieved by passing in a name preceded by a ":".  You can also
 destash a nested attribute like this: ```":invite.code"```.
 
-The stash is also a declarative way to ensure that an operation does not run until some result it needs is
+You can use these ":" names in urls as well, request bodies, and expectations.
+
+The stash is also a nice way to ensure that an operation does not run until some result it needs is
 available.  An operation just waits until the stashed result has been fulfilled.
 
 
@@ -172,10 +174,13 @@ available.  An operation just waits until the stashed result has been fulfilled.
 
 * The default behavior is to check that the response has *at least* the specified values,
   i.e. the expectation does not need to include all of the responses values
-* $unordered: Replace an [1,2,3] with {$unordered: [1, 2, 3]} if order may very
+* $unordered: Replace an [1,2,3] with {$unordered: [1, 2, 3]} if you do not care about the order of the result
 * $length: Replace [1,2,3] with {$length: 3} if all you care about is length
 * {key: "$not-exists"} is {key: "$exists"{: insure the specified field is not present or is present
+* $int: require any integer
+* $date: require any iso date
 * $whatsNext?: let's add more $modifiers as we need them to make comparisons powerful!
+* Check out [expector.js](https://github.com/nomic/api-driver/blob/master/lib/expector.js) to find all the special '$' keywords.
 
 ### Until
 
