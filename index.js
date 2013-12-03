@@ -466,17 +466,9 @@ if (! module.parent) {
     // command line overrides config
     if (program.endpoint) config.endpoint = program.endpoint;
 
-    if (! config.endpoint) {
-        console.log("error: api endpoint not provided");
-        process.exit(1);
-    }
-
     request(config.endpoint+"/version", function(err, resp, body) {
 
         var failed = false;
-        if (err) {
-            throw err;
-        }
         var commitSHA;
         try {
             commitSHA = JSON.parse(body).commit;
