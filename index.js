@@ -390,7 +390,7 @@ if (! module.parent) {
         .option("-S, --not-suites <patterns,...>",
                 "only run suites that do not match the fnmatch pattern",
                 inversePatterns)
-        .option("-t, --test <patterns,...>",
+        .option("-t, --tests <patterns,...>",
                 "only run tests that match the fnmatch pattern",
                 patterns)
         .option("-T, --not-tests <patterns,...>",
