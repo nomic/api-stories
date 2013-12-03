@@ -221,7 +221,6 @@ var config = {};
 
 module.exports = {
     config : function(opts) {
-        apiDriver.config(opts);
         if (opts.endpoint) config.endpoint = opts.endpoint;
     },
 
