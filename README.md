@@ -16,7 +16,7 @@ suite("Lists", function() {
                 handle: name.toLowerCase(),
                 name: name
             })
-            .stash(name.toLowerCase());
+            .stash("yogis");
     });
 
     test("Admins can manipulate a list's members",
