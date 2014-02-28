@@ -2,7 +2,69 @@
 
 JSON API testing without the fuss.
 
+## Example
+
+```js
+suite("Lists", function() {
+
+    before(function(driver) {
+        helpers.setupUsers(driver, ["mia", "ben"]);
+
+        driver
+            .as("admin")
+            .POST("/list", {
+                handle: name.toLowerCase(),
+                name: name
+            })
+            .stash(name.toLowerCase());
+    });
+
+    test("Admins can manipulate a list's members",
+
+        step("Start a basic membership", function(driver) {
+            driver
+                .as("admin")
+                .POST("/list/:yogis.id/membership/:mia.id")
+                .expect(200, {
+                    member: {id: ":mia.id"}
+                });
+        }),
+
+        step("Add a founder", function(driver) {
+            driver
+                .POST("/list/:yogis.id/membership/:ben.id", {
+                    membershipType: "founder"
+                })
+                .expect(200, {
+                    member: {id: ":ben.id"},
+                    membershipType: "founder"
+                });
+        }),
+
+        step("End a membership", function(driver){
+            driver
+                .DELETE("/list/:yogis.id/membership/:mia.id")
+                .expect(204)
+                .DELETE("/list/:yogis.id/membership/:ben.id")
+                .expect(204)
+                .wait()
+                .GET("/list/:yogis.id/membership")
+                .expect(200, { $length: 0 });
+        })
+    );
+    
+    //more tests ....
+
+});
+```
+
 ## How is stories.js different from other testing frameworks.
+
+Stories is only for testing JSON apis.  That's it.  This focus has some benefits.  Your
+tests are passed in a ```driver``` that is custom made to deal with scraping, checking
+and creating JSON, streamlines the asynchronous handling of API results, and provides
+helpers particular to API testing such as polling for eventual consistancy
+with ```until()```.
 
 Similar to other automated test harnesses, stories allows you to break your tests up using
 the ```suite``` and ```test``` key words.  But stories adds two more key words:
@@ -18,12 +80,12 @@ Rather than make you choose between short API tests requiring lots of one-off se
 data, or long tests that do a series of things and could fail anywhere, stories.js
 lets you create a test that is broken into steps.  So, for example, you can create an
 invite in one step, another user can accept the invite in the next step, and then you can confirm
-that you got notified about the acceptance in the final step.
+that you got notified about the acceptance in the last step.
 
 Finally, use cases can branch, and so can stories.js tests.  Anywhere you create a step you can
 instead create branches, where, back to our example, one branch could accept the invite and the
-other could declinde.  Stories.js determines all paths before running your test, and will
-effectively run an isolated test for each path, running your ```before``` and ```after```
+other could decline.  If you use ```branch```, stories.js determines all paths through your
+branches, and will run an isolated test for each path, running your ```before``` and ```after```
 directives and starting from the beginning (creating the invite).
 
 ## Terminology
