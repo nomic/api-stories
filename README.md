@@ -65,7 +65,7 @@ tests are passed in a ```driver``` that is custom made to deal with scraping, ch
 and creating JSON.  The driver also streamlines the asynchronous handling of API results,
 and provides helpers particular to API testing such as polling for eventual consistancy
 with ```until()```.  Lastly, stories can trace your API requests, dumping a JSON
-document containing your all API activity.  It is easy to render this dump and our team
+document containing all API activity.  It is easy to render this dump and our team
 uses it as our API documentation (though I have not made the trivial rendering app public).
 
 Similar to other automated test harnesses, stories allows you to break your tests up using
