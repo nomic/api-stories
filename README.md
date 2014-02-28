@@ -60,31 +60,29 @@ suite("Lists", function() {
 
 ## Another testing framework?  Why?
 
-Stories is only for testing JSON apis.  That's it.  This focus has some benefits.  Your
+api-stories.js is only for testing JSON APIs.  That's it.  This focus has some benefits.  Your
 tests are passed in a ```driver``` that is custom made to deal with scraping, checking
 and creating JSON.  The driver also streamlines the asynchronous handling of API results,
 and provides helpers particular to API testing such as polling for eventual consistancy
-with ```until()```.  Lastly, stories also can trace all API requests, and dumps a JSON
+with ```until()```.  Lastly, stories can trace your API requests, dumping a JSON
 document containing your all API activity.  It is easy to render this dump and our team
-uses it as our API documentation.
+uses it as our API documentation (though I have not made the trivial rendering app public).
 
 Similar to other automated test harnesses, stories allows you to break your tests up using
 the ```suite``` and ```test``` key words.  But stories adds two more key words:
 ```step``` and ```branch```.
 
-Stories.js is inspired by how use cases are structured (though there is *no* *attempt* to simulate the
-english language here!) and is made for higher level integration tests, in particular tests
-that hit a JSON API. These tests tend to naturally be made up of several steps, where the last steps
-are quite dependent on the first steps.  This is different from unit tests which, ideally, are small
-and test exactly one thing.
+Stories is inspired by how use cases are structured (but I promise there is *no* *attempt* to simulate the
+english language here!) and is made for higher level integration tests. These tests tend to naturally
+be made up of several steps, where later steps are indeed dependent on earlier steps.  This is
+different from unit tests which, ideally, are short and test exactly one thing in isolation.
 
-Rather than make you choose between short API tests requiring lots of one-off setup or fixture
-data, or long tests that do a series of things and could fail anywhere, stories.js
-lets you create a test that is broken into steps.  So, for example, you can create an
-invite in one step, another user can accept the invite in the next step, and then you can confirm
-that you got notified about the acceptance in the last step.
+So with Stories you break your test into steps.  For example, as a first step a user might
+send an invitation.  Then, in the next step, another user can accept the invite.  Finally,
+in the last step, the original user can check that they got notified about their invite
+being accepted.
 
-Finally, use cases can branch, and so can stories.js tests.  Anywhere you create a step you can
+Use cases can branch, and so can stories.js tests.  Anywhere you create a step you can
 instead create branches, where, back to our example, one branch could accept the invite and the
 other could decline.  If you use ```branch```, stories.js determines all paths through your
 branches, and will run an isolated test for each path, running your ```before``` and ```after```
