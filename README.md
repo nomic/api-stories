@@ -58,19 +58,21 @@ suite("Lists", function() {
 });
 ```
 
-## How is stories.js different from other testing frameworks.
+## Another testing framework?  Why?
 
 Stories is only for testing JSON apis.  That's it.  This focus has some benefits.  Your
 tests are passed in a ```driver``` that is custom made to deal with scraping, checking
-and creating JSON, streamlines the asynchronous handling of API results, and provides
-helpers particular to API testing such as polling for eventual consistancy
-with ```until()```.
+and creating JSON.  The driver also streamlines the asynchronous handling of API results,
+and provides helpers particular to API testing such as polling for eventual consistancy
+with ```until()```.  Lastly, stories also can trace all API requests, and dumps a JSON
+document containing your all API activity.  It is easy to render this dump and our team
+uses it as our API documentation.
 
 Similar to other automated test harnesses, stories allows you to break your tests up using
 the ```suite``` and ```test``` key words.  But stories adds two more key words:
 ```step``` and ```branch```.
 
-Stories.js is inspired by how use cases are structured (though there is no attempt to simulate the
+Stories.js is inspired by how use cases are structured (though there is *no* *attempt* to simulate the
 english language here!) and is made for higher level integration tests, in particular tests
 that hit a JSON API. These tests tend to naturally be made up of several steps, where the last steps
 are quite dependent on the first steps.  This is different from unit tests which, ideally, are small
