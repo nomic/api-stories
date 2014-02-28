@@ -8,13 +8,15 @@ JSON API testing without the fuss.
 suite("Lists", function() {
 
     before(function(driver) {
+        // Good idea to create helpers for the really common
+        // setup stuff.
         helpers.setupUsers(driver, ["mia", "ben"]);
 
         driver
             .as("admin")
             .POST("/list", {
-                handle: name.toLowerCase(),
-                name: name
+                handle: "yogis",
+                name: "Yogis"
             })
             .stash("yogis");
     });
