@@ -74,10 +74,11 @@ Similar to other automated test harnesses, stories allows you to break your test
 the ```suite``` and ```test``` key words.  But stories adds two more key words:
 ```step``` and ```branch```.
 
-Stories is inspired by how use cases are structured (but I promise there is *no* *attempt* to simulate the
-english language here!) and is made for higher level integration tests. These tests tend to naturally
-be made up of several steps, where later steps are indeed dependent on earlier steps.  This is
-different from unit tests which, ideally, are short and test exactly one thing in isolation.
+Stories is inspired by how use cases are structured and is intended for higher level integration
+tests. These tests tend to naturally be made up of several steps, where later steps are dependent
+on the success of earlier steps.  This is different from unit tests which, ideally, are short
+and test exactly one thing in isolation.  (Note: api-stories.js is inspired by use cases but I
+promise there is *no* *attempt* to simulate the english language here!)
 
 So with Stories you break your test into steps.  For example, as a first step a user might
 send an invitation.  Then, in the next step, another user can accept the invite.  Finally,
