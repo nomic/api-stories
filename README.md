@@ -2,28 +2,94 @@
 
 JSON API testing without the fuss.
 
-## How is stories.js different from other testing frameworks.
+## Example
+
+```js
+suite("Lists", function() {
+
+    before(function(driver) {
+        // Good idea to create helpers for the really common
+        // setup stuff.
+        helpers.setupUsers(driver, ["mia", "ben"]);
+
+        driver
+            .as("admin")
+            .POST("/list", {
+                handle: "yogis",
+                name: "Yogis"
+            })
+            .stash("yogis");
+    });
+
+    test("Admins can manipulate a list's members",
+
+        step("Start a basic membership", function(driver) {
+            driver
+                .as("admin")
+                .POST("/list/:yogis.id/membership/:mia.id")
+                .expect(200, {
+                    member: {id: ":mia.id"}
+                });
+        }),
+
+        step("Add a founder", function(driver) {
+            driver
+                .POST("/list/:yogis.id/membership/:ben.id", {
+                    membershipType: "founder"
+                })
+                .expect(200, {
+                    member: {id: ":ben.id"},
+                    membershipType: "founder"
+                });
+        }),
+
+        step("End a membership", function(driver){
+            driver
+                .DELETE("/list/:yogis.id/membership/:mia.id")
+                .expect(204)
+                .DELETE("/list/:yogis.id/membership/:ben.id")
+                .expect(204)
+                .wait()
+                .GET("/list/:yogis.id/membership")
+                .expect(200, { $length: 0 });
+        })
+    );
+    
+    //more tests ....
+
+});
+```
+
+## Another testing framework?  Why?
+
+api-stories.js is only for testing JSON APIs.  That's it.  This focus has some benefits.  All
+tests are passed a ```driver``` that manages cookies for multiple users and makes stringing
+together many API calls relatively easy.  The driver also makes dealing with lags or eventual
+consistency pretty easy: you just replace ```expect(...)``` with ```until(...)``` and the driver will
+poll instead of doing a single request.  And, stories can trace your API requests, dumping a JSON
+document containing all API activity organized by test.  It is easy to render this
+dump and our team uses it as our API documentation (the trivial rendering app is not
+part of this doc).
 
 Similar to other automated test harnesses, stories allows you to break your tests up using
-the ```suite``` and ```test``` key words.  But stories adds two more key words:
+the ```suite``` and ```test``` key words.  But stories adds two more directives:
 ```step``` and ```branch```.
 
-Stories.js is inspired by how use cases are structured (though there is no attempt to simulate the
-english language here!) and is made for higher level integration tests, in particular tests
-that hit a JSON API. These tests tend to naturally be made up of several steps, where the last steps
-are quite dependent on the first steps.  This is different from unit tests which, ideally, are small
-and test exactly one thing.
+Step and branch are inspired by how use cases are structured.  Like use cases, high level
+integration tests tend to be made up of several steps, where later steps are dependent on
+the success of earlier steps.  This is quite different from unit tests which, ideally, are
+short and test exactly one thing in isolation.
 
-Rather than make you choose between short API tests requiring lots of one-off setup or fixture
-data, or long tests that do a series of things and could fail anywhere, stories.js
-lets you create a test that is broken into steps.  So, for example, you can create an
-invite in one step, another user can accept the invite in the next step, and then you can confirm
-that you got notified about the acceptance in the final step.
+So with stories you are writing higher level tests, and you can, optionally, break your tests
+into steps (and branches, which are a bit more experimental).  For example, as a first step
+a user might send an invitation.  Then, in the next step, another user can accept the invite. 
+Finally, in the last step, the original user can check that they got notified about the invite
+being accepted.
 
-Finally, use cases can branch, and so can stories.js tests.  Anywhere you create a step you can
+Use cases can branch, and so can stories.js tests.  Anywhere you create a step you can
 instead create branches, where, back to our example, one branch could accept the invite and the
-other could declinde.  Stories.js determines all paths before running your test, and will
-effectively run an isolated test for each path, running your ```before``` and ```after```
+other could decline.  If you use branch, stories.js determines all paths through your
+branches, and will run an isolated test for each path, running your ```before``` and ```after```
 directives and starting from the beginning (creating the invite).
 
 ## Terminology
@@ -104,7 +170,7 @@ suite("Invites", function() {
             driver
             .introduce("recipient")
             .GET("/invites/to/:invite.to")
-            .expect(200, {code: "$exists", to: ":invite.to"})
+            .until(200, {code: "$exists", to: ":invite.to"})
             .stash("invite");
 
         }),
@@ -138,7 +204,7 @@ suite("Invites", function() {
 
 Each story or step is passed a driver.
 
-A driver makes it easy to call your api and run expectations on it.
+A driver makes it easy to call your api and check expectations.
 
 Additionally, a driver manages two very useful pieces of state:
 
@@ -149,7 +215,7 @@ Additionally, a driver manages two very useful pieces of state:
 
 ### Stash
 
-Any request result can be stashed, e.g.:
+Any result can be stashed, e.g.:
 
 ```js
         .stash("invite");
@@ -184,8 +250,17 @@ available.  An operation just waits until the stashed result has been fulfilled.
 
 ### Until
 
-* .until(...) works exactly like .expect(...), only it will repeat the previous api call
-  *until* the stated condition is met, or give up after 10 seconds (not configurable yet)
+* .until(..., [millis]) works exactly like .expect(...), only it will repeat the previous api call
+  *until* the stated condition is met, or give up after 10 seconds (not configurable yet) or the
+  specified time.  It's not recommended to specify millis, except when initially setting up
+  the test.  If you try to give up fast, you'll end up with intermittent test failures, which are
+  the worst kind of failures.
+
+### Never
+
+* .never(..., [millis]) ensures that some expectation "never" comes to be, or at least doesn't happen
+for a while... By default it waits 10 seconds.  (This can make testing take painfully long.  Need to
+come up with a way to unblock future tests while leaving a never check active in the background.)
 
 ## Before
 
