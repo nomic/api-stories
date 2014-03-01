@@ -1,4 +1,4 @@
-# stories.js
+# api-stories.js
 
 JSON API testing without the fuss.
 
