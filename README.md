@@ -5,9 +5,6 @@ JSON API testing without the fuss.
 ## Example Test
 
 ```js
-// invites.js
-// Note that steps can contain more steps, and nest as deeply as you like
-
 suite("Invites", function() {
 
     before(function(driver) {
