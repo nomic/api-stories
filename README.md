@@ -207,13 +207,13 @@ Switch the current actor.  Under the hood, this just switches the current cookie
 Any result can be stashed, e.g.:
 
 ```js
-        .stash("invite");
+.stash("invite");
 ```
 
 You can stash only part of a result if you like:
 
 ```js
-        .stash("inviteCode", function(result) { return result.json.code; });
+.stash("inviteCode", function(result) { return result.json.code; });
 ```
 
 Anything you've stashed can be retrieved by passing in a name preceded by a ":".  You can also
