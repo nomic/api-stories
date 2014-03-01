@@ -30,24 +30,34 @@ var Topic = function(description) {
     this._afterFn = function() {};
 };
 
-
-var depthFirst = function(step) {
+// transform:
+//
+// [a, [b,c,[d],[e]],[f,g]] -> [[a,b,c,d], [a,b,c,e], [a,f,g]]
+//
+var toPaths = function(steps) {
     var paths = [];
+    var _toPaths = function(steps, idx, path) {
+        var step = steps[idx];
+        if (_.isArray(step)) {
+            _toPaths(step, 0, _.clone(path));
+        } else {
+            path.push(step);
+        }
 
-    var _depthFirst = function(step, path) {
-        path.push(step);
-        if (! step || ! step.nextSteps || step.nextSteps.length === 0) {
-            //leaf -- this is the end of a path
-            paths.push(path);
+        if (steps[idx+1]) {
+            _toPaths(steps, idx+1, path);
             return;
         }
-        _.each(step.nextSteps, function(c) {
-                var newPath = _.clone(path);
-                _depthFirst(c, newPath);
-            });
+        if (steps[idx+1] === null) {
+            //deferred
+            path.push(null);
+        }
+        // end of a path
+        if (! _.isArray(step)) paths.push(path);
+        return;
     };
 
-    _depthFirst(step, []);
+    _toPaths(steps, 0, []);
     return paths;
 };
 
@@ -87,7 +97,7 @@ Topic.prototype.run = function(pathPatterns, before, after, stories, reporter, p
 
     async.forEachSeries(stories, function(story, storyCb) {
 
-        if (! story.root ) {
+        if (! story.steps) {
             console.log(story.description);
             console.log("  #### deferred ####");
             return storyCb();
@@ -96,7 +106,7 @@ Topic.prototype.run = function(pathPatterns, before, after, stories, reporter, p
         reporter.story(story.description);
         console.log(story.description);
 
-        var paths = depthFirst(story.root);
+        var paths = toPaths(story.steps);
         if (pathPatterns) {
             paths = _.filter(paths, function(path) {
                 var desc = pathDesc(path);
@@ -120,12 +130,10 @@ Topic.prototype.run = function(pathPatterns, before, after, stories, reporter, p
 
                 reporter.path();
 
-                var stepDeferred = false;
-                _.each(path, function(step) {
+                var stepDeferred = ! _.all(path, function(step) {
 
                     if ( ! step ) {
-                        stepDeferred = true;
-                        return;
+                        return false;
                     }
 
                     reporter.step(step.description, step.isFork);
@@ -137,7 +145,7 @@ Topic.prototype.run = function(pathPatterns, before, after, stories, reporter, p
                     driver.scribingOff();
 
                     reporter.endStep();
-
+                    return true;
                 });
 
                 reporter.endPath();
@@ -199,44 +207,8 @@ var runTopics = function(opts, pathReporter, transcriptReporter, done) {
 };
 
 
-var linkSteps = function(steps) {
-    assert(   steps.what === "step"
-           || _.isArray(steps));
-    if (steps.what === "step") return steps;
-    var curStep = steps[0];
-    _.any(_.rest(steps), function(step) {
-        if (curStep === null) return true;
-        if (_.isArray(step)) {
-            curStep.nextSteps = step;
-        } else {
-            curStep.nextSteps = [step];
-            curStep = step;
-        }
-    });
-
-    return steps[0];
-};
-
-var config = {};
-
 module.exports = {
-    config : function(opts) {
-        if (opts.endpoint) config.endpoint = opts.endpoint;
-    },
-
-    beforeEachPath : function(fn) {
-        // console.log(fn.toString());
-        assert(_.isFunction(fn));
-        beforeFn = fn;
-    },
-
-    afterEachPath: function(fn) {
-        // console.log(fn.toString());
-        assert(_.isFunction(fn));
-        afterFn = fn;
-    },
-
-    topic : function(description, fn) {
+    suite : function(description, fn) {
         openTopic = new Topic(description);
         fn();
         topics.push(openTopic);
@@ -245,60 +217,40 @@ module.exports = {
 
     before : function(fn) {
         assert(_.isFunction(fn));
-        openTopic.setBefore(fn);
+        if (openTopic) openTopic.setBefore(fn);
+        else beforeFn = fn;
     },
 
     after : function(fn) {
         assert(_.isFunction(fn));
-        openTopic.setAfter(fn);
+        if (openTopic) openTopic.setAfter(fn);
+        else afterFn = fn;
     },
 
-    story : function(description, body) {
-        assert( _.isFunction(body)
-                || body === null
-                || body.what === "step",
-                "Story must be a function or a step");
-        var step;
-        if (_.isFunction(body)) {
-            step = {
-                what: "step",
-                description: "$body$",
-                fn: body,
-                nextSteps: []
-            };
-        } else {
-            step = body;
-        }
-
-        var story = {
-            description: description,
-            root: step
-        };
-
-        openTopic.addStory(story);
-    },
-
-    test : function(description /*, splat...*/) {
+    test : function(description /*, function | steps... */) {
         var splat = _.rest(_.toArray(arguments));
         assert( _.isFunction(splat[0])
                 || splat[0] === null
                 || splat[0].what === "step",
                 "Test takes a function or a step");
-        var rootStep;
+        var steps;
+
         if (_.isFunction(splat[0])) {
-            rootStep = {
+            // A test that is not broken into steps
+            steps = [{
                 what: "step",
                 description: "$body$",
                 fn: splat[0],
-                nextSteps: []
-            };
+            }];
+        } else if (! splat[0]) {
+            steps = null;
         } else {
-            rootStep = linkSteps(splat);
+            steps = _.toArray(splat);
         }
 
         var story = {
             description: description,
-            root: rootStep
+            steps: steps
         };
 
         openTopic.addStory(story);
@@ -308,45 +260,20 @@ module.exports = {
     step : function(description, fn) {
         assert(_.isFunction(fn) || fn === null);
 
-        var steps = [];
-        if (fn !== null) {
-            steps = _.toArray(arguments).slice(2);
-            assert( _.all(steps, function(s) { return s === null || s.what === "step"; } ),
-                    "Optional args to a step must be additional steps or null" );
-            if (steps.length > 1) {
-                _.map(steps, function(step) {
-                    if (step) step.isFork = true;
-                    return step;
-                });
-            }
-
-            // other steps are deferred
-            var last = steps.indexOf(null);
-            if (last !== -1) {
-                steps = steps.slice(0, last+1);
-            }
-        }
-
         return {
             what: "step",
             description: description,
             fn: fn,
-            nextSteps: steps
         };
     },
 
-    branch : function(/* branches... */) {
-        var nextSteps = [];
-        _.each(_.toArray(arguments), function(steps) {
-            nextSteps.push(_.extend(linkSteps(steps), {isFork: true}));
-        });
-        return nextSteps;
+    branch : function(/* steps... */) {
+        return _.toArray(arguments);
     }
 
 };
 
 
-module.exports.suite = module.exports.topic;
 module.exports.beforeEach = module.exports.beforeEachPath;
 module.exports.afterEach = module.exports.afterEachPath;
 module.exports.expectations = require("api-driver/expectations");
