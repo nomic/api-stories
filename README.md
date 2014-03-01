@@ -89,7 +89,7 @@ together many API calls relatively easy.  The driver also makes dealing with lag
 consistency pretty easy: you just replace ```expect(...)``` with ```until(...)``` and the driver will
 poll instead of doing a single request.  And, stories can trace your API requests, dumping a JSON
 document containing all API activity organized by test.  It is easy to render this
-dump and our team uses it as our API documentation (the trivial rendering app is not
+dump and our team uses it as our API documentation (the rendering app is pretty basic, but is not
 yet part of this github repo).
 
 Similar to other automated test harnesses, stories allows you to break your tests up using
