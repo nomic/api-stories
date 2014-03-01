@@ -62,32 +62,33 @@ suite("Lists", function() {
 
 ## Another testing framework?  Why?
 
-api-stories.js is only for testing JSON APIs.  That's it.  This focus has some benefits.  Your
-tests are passed in a ```driver``` that is custom made to deal with scraping, checking
-and creating JSON.  The driver also streamlines the asynchronous handling of API results,
-and provides helpers particular to API testing such as polling for eventual consistancy
-with ```until()```.  Lastly, stories can trace your API requests, dumping a JSON
-document containing all API activity.  It is easy to render this dump and our team
-uses it as our API documentation (though I have not made the trivial rendering app public).
+api-stories.js is only for testing JSON APIs.  That's it.  This focus has some benefits.  All
+tests are passed a ```driver``` that manages cookies for multiple users and makes stringing
+together many API calls relatively easy.  The driver also makes dealing with lags or eventual
+consistency pretty easy: you just replace ```expect(...)``` with ```until(...)``` and the driver will
+poll instead of doing a single request.  And, stories can trace your API requests, dumping a JSON
+document containing all API activity organized by test.  It is easy to render this
+dump and our team uses it as our API documentation (the trivial rendering app is not
+part of this doc).
 
 Similar to other automated test harnesses, stories allows you to break your tests up using
-the ```suite``` and ```test``` key words.  But stories adds two more key words:
+the ```suite``` and ```test``` key words.  But stories adds two more directives:
 ```step``` and ```branch```.
 
-Stories is inspired by how use cases are structured and is intended for higher level integration
-tests. These tests tend to naturally be made up of several steps, where later steps are dependent
-on the success of earlier steps.  This is different from unit tests which, ideally, are short
-and test exactly one thing in isolation.  (Note: api-stories.js is inspired by use cases but I
-promise there is *no* *attempt* to simulate the english language here!)
+Step and branch are inspired by how use cases are structured.  Like use cases, high level
+integration tests tend to be made up of several steps, where later steps are dependent on
+the success of earlier steps.  This is quite different from unit tests which, ideally, are
+short and test exactly one thing in isolation.
 
-So with Stories you break your test into steps.  For example, as a first step a user might
-send an invitation.  Then, in the next step, another user can accept the invite.  Finally,
-in the last step, the original user can check that they got notified about their invite
+So with stories you are writing higher level tests, and you can, optionally, break your tests
+into steps (and branches, which are a bit more experimental).  For example, as a first step
+a user might send an invitation.  Then, in the next step, another user can accept the invite. 
+Finally, in the last step, the original user can check that they got notified about the invite
 being accepted.
 
 Use cases can branch, and so can stories.js tests.  Anywhere you create a step you can
 instead create branches, where, back to our example, one branch could accept the invite and the
-other could decline.  If you use ```branch```, stories.js determines all paths through your
+other could decline.  If you use branch, stories.js determines all paths through your
 branches, and will run an isolated test for each path, running your ```before``` and ```after```
 directives and starting from the beginning (creating the invite).
 
@@ -169,7 +170,7 @@ suite("Invites", function() {
             driver
             .introduce("recipient")
             .GET("/invites/to/:invite.to")
-            .expect(200, {code: "$exists", to: ":invite.to"})
+            .until(200, {code: "$exists", to: ":invite.to"})
             .stash("invite");
 
         }),
@@ -203,7 +204,7 @@ suite("Invites", function() {
 
 Each story or step is passed a driver.
 
-A driver makes it easy to call your api and run expectations on it.
+A driver makes it easy to call your api and check expectations.
 
 Additionally, a driver manages two very useful pieces of state:
 
@@ -214,7 +215,7 @@ Additionally, a driver manages two very useful pieces of state:
 
 ### Stash
 
-Any request result can be stashed, e.g.:
+Any result can be stashed, e.g.:
 
 ```js
         .stash("invite");
@@ -251,6 +252,13 @@ available.  An operation just waits until the stashed result has been fulfilled.
 
 * .until(...) works exactly like .expect(...), only it will repeat the previous api call
   *until* the stated condition is met, or give up after 10 seconds (not configurable yet)
+
+### Never
+
+* .never(...) ensures that some expectation "never" comes to be, or at least doesn't happen
+for a while... By default it waits 10 seconds., though you can pass milliseconds to wait for
+as the final argument.  (This can make testing take painfully long.  Need to come up with a way
+to unblock future tests while leaving a never check active in the background.)
 
 ## Before
 
