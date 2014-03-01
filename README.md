@@ -247,7 +247,7 @@ The stash is also a nice way to ensure that an operation does not run until some
 available.  An operation just waits until the stashed result has been fulfilled.
 
 ### .wait([millis])
-
+By default, driver executes all of your requests in parallel.  Often a request will automatically block because it needs a stashed variable from a previous requests.  However, other times you just need to say wait() if there is no such var that it makes sense to block on.  Requests after a wait() won't fire untill all previous requests have returned.  You can also specify an *additional* number of millis to wait for.
 
 
 ### Expectations
