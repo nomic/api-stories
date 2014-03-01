@@ -403,14 +403,10 @@ if (! module.parent) {
                 inversePatterns)
         .option("-o, --transcripts <dir>",
                 "output directory for transcripts")
-        .option("-e, --endpoint <dir>",
-                "Url for the base path of the api.  If path portion is " +
-                "included, e.g. /api/v1/, it will be appended to " +
-                "all requests.")
-        .option("-c, --setup <dir>",
-                "Location of the setup file.  By default, stories from the " +
-                "the first test file and checks each folder " +
-                "up to the root for 'stories_setup.js')")
+        .option("-c, --setup <file>",
+                "Specify the setup file.  By default, stories looks for" +
+                "stories_setup.js by starting from the path of the first" +
+                "specifed test and searching up to the root.")
         .parse(process.argv);
 
     var outDir = program.transcripts;
@@ -460,80 +456,64 @@ if (! module.parent) {
         load(setupFile);
     }
 
-    // load(testFiles[0]); // first file is the config file
-    // testFiles = _.rest(testFiles);
+    var failed = false;
+    var transcripts = [];
+    var apiIndex = {
+        commit: null,
+        transcripts: transcripts
+    };
+    var expectationsPassed = 0;
+    var expectationsFailed = 0;
+    async.forEachSeries(testFiles, function(testFile, callback) {
 
-    // command line overrides config
-    if (program.endpoint) config.endpoint = program.endpoint;
+        // give filename relative path for use with requires
+        load(testFile);
+        callback();
 
-    request(config.endpoint+"/version", function(err, resp, body) {
+    }, function() {
+        runTopics(
 
-        var failed = false;
-        var commitSHA;
-        try {
-            commitSHA = JSON.parse(body).commit;
-            assert(commitSHA);
-        } catch(e) {
-            console.error("warning: api version string not found");
-        }
-        var transcripts = [];
-        var apiIndex = {
-            commit: commitSHA,
-            transcripts: transcripts
-        };
-        var expectationsPassed = 0;
-        var expectationsFailed = 0;
-        async.forEachSeries(testFiles, function(testFile, callback) {
+            program,
 
-            // give filename relative path for use with requires
-            load(testFile);
-            callback();
-
-        }, function() {
-            runTopics(
-
-                program,
-
-                // called for each path
-                function(err, path, expectationResults) {
-                    if (err || expectationResults.expectationsFailed) {
-                        //it's an error
-                        console.log("  XX: " + path);
-                        console.log();
-                        console.log(err ? err.stack : expectationResults.err.stack);
-                        console.log();
-                        failed = true;
-                    } else {
-                        var msg = path === "" ? "  ok" : "  ok: " + path;
-                        console.log(msg);
-                    }
-                    if (expectationResults) {
-                        expectationsPassed += expectationResults.expectationsPassed;
-                        expectationsFailed += expectationResults.expectationsFailed;
-                    }
-                },
-                function(transcript) {
-                    if (! outDir) { return; }
-
-                    var outFile = path.basename(transcript.description.replace(/ /g, '_'), ".js") + ".json";
-                    fs.writeFileSync(outDir + "/" + outFile, JSON.stringify(transcript, null, 4));
-                    transcripts.push({desc: transcript.description, file: outFile});
-                },
-                // called when all done
-                function() {
-                    if (outDir) {
-                        fs.writeFileSync(outDir + "/index2.json", JSON.stringify(apiIndex, null, 4));
-                    }
-                    if (!failed) {
-                        logRight("Expectations Passed: " + expectationsPassed);
-                        logRight("ALL OK!");
-                    } else {
-                        logRight("Expectations Failed: " + expectationsFailed);
-                        logRight("FAILED!");
-                        process.exit(1);
-                    }
+            // called for each path
+            function(err, path, expectationResults) {
+                if (err || expectationResults.expectationsFailed) {
+                    //it's an error
+                    console.log("  XX: " + path);
+                    console.log();
+                    console.log(err ? err.stack : expectationResults.err.stack);
+                    console.log();
+                    failed = true;
+                } else {
+                    var msg = path === "" ? "  ok" : "  ok: " + path;
+                    console.log(msg);
                 }
-            );
-        });
+                if (expectationResults) {
+                    expectationsPassed += expectationResults.expectationsPassed;
+                    expectationsFailed += expectationResults.expectationsFailed;
+                }
+            },
+            function(transcript) {
+                if (! outDir) { return; }
+
+                var outFile = path.basename(transcript.description.replace(/ /g, '_'), ".js") + ".json";
+                fs.writeFileSync(outDir + "/" + outFile, JSON.stringify(transcript, null, 4));
+                transcripts.push({desc: transcript.description, file: outFile});
+            },
+            // called when all done
+            function() {
+                if (outDir) {
+                    fs.writeFileSync(outDir + "/index2.json", JSON.stringify(apiIndex, null, 4));
+                }
+                if (!failed) {
+                    logRight("Expectations Passed: " + expectationsPassed);
+                    logRight("ALL OK!");
+                } else {
+                    logRight("Expectations Failed: " + expectationsFailed);
+                    logRight("FAILED!");
+                    process.exit(1);
+                }
+            }
+        );
     });
 }
