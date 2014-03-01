@@ -90,7 +90,7 @@ consistency pretty easy: you just replace ```expect(...)``` with ```until(...)``
 poll instead of doing a single request.  And, stories can trace your API requests, dumping a JSON
 document containing all API activity organized by test.  It is easy to render this
 dump and our team uses it as our API documentation (the trivial rendering app is not
-part of this doc).
+yet part of this github repo).
 
 Similar to other automated test harnesses, stories allows you to break your tests up using
 the ```suite``` and ```test``` key words.  But stories adds two more directives:
