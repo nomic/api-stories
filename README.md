@@ -107,12 +107,6 @@ a user might send an invitation.  Then, in the next step, another user can accep
 Finally, in the last step, the original user can check that they got notified about the invite
 being accepted.
 
-Use cases can branch, and so can stories.js tests.  Anywhere you create a step you can
-instead create branches, where, back to our example, one branch could accept the invite and the
-other could decline.  If you use branch, stories.js determines all paths through your
-branches, and will run an isolated test for each path, running your ```before``` and ```after```
-directives and starting from the beginning (creating the invite).
-
 ## Configuration example:
 A config file named ```stories_setup.js``` should be place somewhere above the folder that
 contains your test files.  api-stories.js starts in the folder of your test files, then traverses to root looking for it.  Here's an example from a real project:
