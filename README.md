@@ -254,12 +254,12 @@ By default, driver executes all of your requests in parallel.  Often a request w
 
 * The default behavior is to check that the response has *at least* the specified values,
   i.e. the expectation does not need to include all of the responses values
-* $unordered: Replace an [1,2,3] with {$unordered: [1, 2, 3]} if you do not care about the order of the result
-* $length: Replace [1,2,3] with {$length: 3} if all you care about is length
-* {key: "$not-exists"} is {key: "$exists"{: insure the specified field is not present or is present
-* $int: require any integer
-* $date: require any iso date
-* $gt, $gte, $lt, $lte
+* `$unordered`: Replace an [1,2,3] with {$unordered: [1, 2, 3]} if you do not care about the order of the result
+* `$length`: Replace [1,2,3] with {$length: 3} if all you care about is length
+* `{key: "$not-exists"}` and `{key: "$exists"}`: insure the specified field is not present or is present
+* `$int`: require any integer
+* `$date`: require any iso date
+* `$gt`, `$gte`, `$lt`, `$lte`
 * Check out [expector.js](https://github.com/nomic/api-driver/blob/master/lib/expector.js) to find all the special '$' keywords.
 
 ### .until()
