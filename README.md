@@ -250,15 +250,17 @@ available.  An operation just waits until the stashed result has been fulfilled.
 
 ### Until
 
-* .until(...) works exactly like .expect(...), only it will repeat the previous api call
-  *until* the stated condition is met, or give up after 10 seconds (not configurable yet)
+* .until(..., [millis]) works exactly like .expect(...), only it will repeat the previous api call
+  *until* the stated condition is met, or give up after 10 seconds (not configurable yet) or the
+  specified time.  It's not recommended to specify millis, except when initially setting up
+  the test.  If you try to give up fast, you'll end up with intermittent test failures, which are
+  the worst kind of failures.
 
 ### Never
 
-* .never(...) ensures that some expectation "never" comes to be, or at least doesn't happen
-for a while... By default it waits 10 seconds., though you can pass milliseconds to wait for
-as the final argument.  (This can make testing take painfully long.  Need to come up with a way
-to unblock future tests while leaving a never check active in the background.)
+* .never(..., [millis]) ensures that some expectation "never" comes to be, or at least doesn't happen
+for a while... By default it waits 10 seconds.  (This can make testing take painfully long.  Need to
+come up with a way to unblock future tests while leaving a never check active in the background.)
 
 ## Before
 
