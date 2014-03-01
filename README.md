@@ -2,62 +2,87 @@
 
 JSON API testing without the fuss.
 
-## Example
+## Example Test
 
 ```js
-suite("Lists", function() {
+// invites.js
+// Note that steps can contain more steps, and nest as deeply as you like
+
+suite("Invites", function() {
 
     before(function(driver) {
         // Good idea to create helpers for the really common
         // setup stuff.
         helpers.setupUsers(driver, ["mia", "ben"]);
-
-        driver
-            .as("admin")
-            .POST("/list", {
-                handle: "yogis",
-                name: "Yogis"
-            })
-            .stash("yogis");
     });
 
-    test("Admins can manipulate a list's members",
+    test("Send an invite and respond to it",
 
-        step("Start a basic membership", function(driver) {
+        step("Send invite", function(driver) {
+
             driver
-                .as("admin")
-                .POST("/list/:yogis.id/membership/:mia.id")
-                .expect(200, {
-                    member: {id: ":mia.id"}
-                });
+            .as("mia")
+            .POST("/invites", {to: ":ben.name"})
+            .expect(200, {to: ":ben.name"})
+            .stash("invite");
         }),
 
-        step("Add a founder", function(driver) {
+        step("Receive invite", function(driver) {
+
             driver
-                .POST("/list/:yogis.id/membership/:ben.id", {
-                    membershipType: "founder"
-                })
-                .expect(200, {
-                    member: {id: ":ben.id"},
-                    membershipType: "founder"
-                });
+            .as("ben")
+            .GET("/invites/to/:ben.id")
+            .until(200, [{code: "$exists", from: ":mia.id"}])
+            .GET("/invites/to/:ben.id?status=accepted")
+            .expect(200, {$length: 0})
+
         }),
 
-        step("End a membership", function(driver){
-            driver
-                .DELETE("/list/:yogis.id/membership/:mia.id")
+
+        branch(
+            step("Accept invite", function(driver) {
+
+                driver
+                .as("ben")
+                .POST("/invites/accept", {code: ":invite.code"})
                 .expect(204)
-                .DELETE("/list/:yogis.id/membership/:ben.id")
+                .GET("/invites/to/:ben.id?status=accepted")
+                .expect(200, {$length: 1})
+            })
+        ),
+
+        branch(
+            step("Decline invite", function(driver) {
+
+                driver
+                .as("ben")
+                .POST("/invites/decline", {code: ":invite.code"})
                 .expect(204)
-                .wait()
-                .GET("/list/:yogis.id/membership")
-                .expect(200, { $length: 0 });
-        })
-    );
+            })
+        ),
+
+    ));
     
-    //more tests ....
+    // more invite tests can be added to the suite here...
 
 });
+
+```
+
+## Get Started
+
+```bash
+$ npm install -g api-stories
+$ stories --help
+$ cat > stories_setup.js
+var stories = require("stories")
+stories.before( function(driver) {
+    driver
+        .config({
+            requestEndpoint: "http://localhost:3000",
+        })
+});
+$ stories tests/* 
 ```
 
 ## Another testing framework?  Why?
@@ -92,6 +117,62 @@ other could decline.  If you use branch, stories.js determines all paths through
 branches, and will run an isolated test for each path, running your ```before``` and ```after```
 directives and starting from the beginning (creating the invite).
 
+## Configuration example:
+A config file named ```stories_setup.js``` should be place somewhere above the folder that
+contains your test files.  api-stories.js starts in the folder of your test files, then traverses to root looking for it.  Here's an example from a real project:
+
+```js
+"use strict";
+
+var stories = require("stories"),
+    _ = require("lodash"),
+    assert = require("assert");
+
+_.mixin(require("underscore.string").exports());
+
+// Make these global for convenience.  Not required.
+global.suite = stories.suite;
+global.test = stories.test;
+global.step = stories.step;
+global.branch = stories.branch;
+global.before = stories.before;
+global.after = stories.after;
+
+require("http").globalAgent.maxSockets = 20;
+
+// If no expectation or until clause is specified,
+// expect that we at least get a 2xx code.
+function defaultExpectation(result) {
+    assert(
+      [200, 201, 202, 203, 204].indexOf(result.statusCode) !== -1,
+      "Expectd 2xx status code by default, but got: " + result.statusCode +
+      "\nResponse Body:\n"+JSON.stringify(result.json, null, 4)
+    );
+    return true;
+}
+
+// Setup the default directory for data files.
+// The driver's upload command will look here.
+// drive.config.data = __dirname + "/../data";
+
+// Run this before every path of every suite.
+stories.before( function(driver) {
+    driver
+        .config({
+            requestEndpoint: "http://localhost:3100/api",
+            defaultExpectation: defaultExpectation
+        })
+        .introduce("admin")
+        .GET("/test/reset_elastic_search")
+        .GET("/test/reset_database")
+        .GET("/test/reset_caches/")
+        .wait()
+        .POST("/auth/form", {"handle": "roboto", "password": "abc1234"})
+        .stash("admin");
+});
+```
+
+
 ## Terminology
 
 ### Step
@@ -125,80 +206,6 @@ $ ./stories --help
 $ stories tests/*
 ```
 
-## A Simple Example
-
-```js
-// invites.js
-
-suite("Invites", function() {
-
-    test("Send", function(driver) {
-
-        driver
-        .introduce("sender")  //create a session (cookie jar) we'll refer to as "sender"
-
-        .POST("/invites")
-        .stash("invite")
-        .expect(200, {to: "1234"});
-
-    });
-
-});
-```
-
-## A Story With Steps
-
-```js
-// invites.js
-// Note that steps can contain more steps, and nest as deeply as you like
-
-suite("Invites", function() {
-
-    test("Send an invite and respond to it",
-
-        step("Send invite", function(driver) {
-
-            driver
-            .introduce("sender")  //create a session (cookie jar) we'll refer to as "sender"
-            .POST("/invites", {to: "harry"})
-            .stash("invite")
-            .expect(200, {to: "harry"});
-        }),
-
-        step("Receive invite", function(driver) {
-
-            driver
-            .introduce("recipient")
-            .GET("/invites/to/:invite.to")
-            .until(200, {code: "$exists", to: ":invite.to"})
-            .stash("invite");
-
-        }),
-
-
-        branch(
-            step("accept", function(driver) {
-
-                driver
-                .as("recipient")
-                // use a ":" to dereference a previously stashed results
-                .POST("/invites/accept", {code: ":invite.code"})
-                .expect(200);
-            })
-        ),
-
-        branch(
-            step("decline", function(driver) {
-                // code for declining the invite goes here
-            })
-        ),
-
-    ));
-
-});
-
-```
-
 
 ## Driver
 
@@ -218,16 +225,17 @@ Introduce an actor.  Under the hood, creates a new cookie collection, assigns it
 
 ### .as(name)
 
-Switch the current actor.  Under the hood, this just switches the current cookie collection.
+Switch the current actor.  Under the hood, this just switches the current cookie collection.  Must intrdoduce an actor first.
 
 ### .<http_method>(url, headers)
-.PUT(url, body, headers)
-.PATCH(url, body, headers)
-.POST(url, body, headers)
+   .GET(url, headers)
 .DELETE(url, headers)
-.HEAD(url, headers)
+  .HEAD(url, headers)
+   .PUT(url, body, headers)
+ .PATCH(url, body, headers)
+  .POST(url, body, headers)
 
-
+### .stash()
 Any result can be stashed, e.g.:
 
 ```js
@@ -261,10 +269,10 @@ available.  An operation just waits until the stashed result has been fulfilled.
 * {key: "$not-exists"} is {key: "$exists"{: insure the specified field is not present or is present
 * $int: require any integer
 * $date: require any iso date
-* $whatsNext?: let's add more $modifiers as we need them to make comparisons powerful!
+* $gt, $gte, $lt, $lte
 * Check out [expector.js](https://github.com/nomic/api-driver/blob/master/lib/expector.js) to find all the special '$' keywords.
 
-### Until
+### .until()
 
 * .until(..., [millis]) works exactly like .expect(...), only it will repeat the previous api call
   *until* the stated condition is met, or give up after 10 seconds (not configurable yet) or the
@@ -272,22 +280,8 @@ available.  An operation just waits until the stashed result has been fulfilled.
   the test.  If you try to give up fast, you'll end up with intermittent test failures, which are
   the worst kind of failures.
 
-### Never
+### .never()
 
 * .never(..., [millis]) ensures that some expectation "never" comes to be, or at least doesn't happen
 for a while... By default it waits 10 seconds.  (This can make testing take painfully long.  Need to
 come up with a way to unblock future tests while leaving a never check active in the background.)
-
-## Before
-
-There are two important before methods.  These are analogous to "setup" in your typical testing
-suite.
-
-* beforeEach(fn) : The "global" before.  fn is called before any path is started
-* before(fn) : Declared inside a story.  fn is called just after the global before, and just ahead
-  of any path in the current story.
-
-## Waiting on EventEmitter Events
-
-The `driver.on(emitter, evt, [ fn ])` can be used to wait on a specific `EventEmitter` event and optionally invoke `fn` when it is emitted.
-If `fn` returns a value, this value will be the value the promise returns. If `fn` throws an exception, the promise will fail.
