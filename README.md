@@ -38,7 +38,6 @@ suite("Invites", function() {
 
         }),
 
-
         branch(
             step("Accept invite", function(driver) {
 
