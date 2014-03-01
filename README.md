@@ -195,13 +195,15 @@ Introduce an actor.  Under the hood, creates a new cookie collection, assigns it
 
 Switch the current actor.  Under the hood, this just switches the current cookie collection.  Must intrdoduce an actor first.
 
-### .<http_method>(url, headers)
+### Http methods
+```
    .GET(url, headers)
 .DELETE(url, headers)
   .HEAD(url, headers)
    .PUT(url, body, headers)
  .PATCH(url, body, headers)
   .POST(url, body, headers)
+```
 
 ### .stash()
 Any result can be stashed, e.g.:
