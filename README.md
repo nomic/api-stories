@@ -162,28 +162,6 @@ stories.before( function(driver) {
 });
 ```
 
-
-## Terminology
-
-### Step
-
-A story may be broken up into steps.  For example, (1) send an invite and then (2) accept the invite.
-
-### Branch
-
-There may be branching between steps as is common in real world scenarios.  For example, you might want
-to test accepting an invite and also declining an invite.
-
-### Path
-
-The invite story just described has two paths:
-
-* invite > accept
-* invite > decline
-
-Note there are three steps, and two paths.  A path is one of the possible trips through the steps of a
-story.  When a story is executed, all paths will be tested.
-
 ## Running stories
 
 ```bash
