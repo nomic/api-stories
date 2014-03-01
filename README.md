@@ -228,9 +228,9 @@ available.  An operation just waits until the stashed result has been fulfilled.
 By default, driver executes all of your requests in parallel.  Often a request will automatically block because it needs a stashed variable from a previous requests.  However, other times you just need to say wait() if there is no such var that it makes sense to block on.  Requests after a wait() won't fire untill all previous requests have returned.  You can also specify an *additional* number of millis to wait for.
 
 
-### Expectations
-
-* The default behavior is to check that the response has *at least* the specified values,
+### .expect([statusCode], [fn|jsonExpression]);
+* If using a custom fn, it must return true to pass, and return false or throw an exception to fail.
+* The default behavior for a json expression is to check that the response has *at least* the specified values,
   i.e. the expectation does not need to include all of the responses values
 * `$unordered`: Replace an [1,2,3] with {$unordered: [1, 2, 3]} if you do not care about the order of the result
 * `$length`: Replace [1,2,3] with {$length: 3} if all you care about is length
