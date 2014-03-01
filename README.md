@@ -212,8 +212,21 @@ Additionally, a driver manages two very useful pieces of state:
 2. the stash: responses you save to use in later requests
 
 
+### .introduce(name)
 
-### Stash
+Introduce an actor.  Under the hood, creates a new cookie collection, assigns it to that name, and sets it as the current cookie colleciton for subsequent requests.
+
+### .as(name)
+
+Switch the current actor.  Under the hood, this just switches the current cookie collection.
+
+### .<http_method>(url, headers)
+.PUT(url, body, headers)
+.PATCH(url, body, headers)
+.POST(url, body, headers)
+.DELETE(url, headers)
+.HEAD(url, headers)
+
 
 Any result can be stashed, e.g.:
 
@@ -224,16 +237,19 @@ Any result can be stashed, e.g.:
 You can stash only part of a result if you like:
 
 ```js
-        .stash("inviteCode", function(body) { return body.code; });
+        .stash("inviteCode", function(result) { return result.json.code; });
 ```
 
 Anything you've stashed can be retrieved by passing in a name preceded by a ":".  You can also
 destash a nested attribute like this: ```":invite.code"```.
 
-You can use these ":" names in urls as well, request bodies, and expectations.
+You can use these ":" names in urls, request bodies, and expectations.
 
 The stash is also a nice way to ensure that an operation does not run until some result it needs is
 available.  An operation just waits until the stashed result has been fulfilled.
+
+### .wait([millis])
+
 
 
 ### Expectations
