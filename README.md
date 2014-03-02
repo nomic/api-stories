@@ -77,7 +77,7 @@ suite("Invites", function() {
 $ npm install -g api-stories
 $ stories --help
 $ cat > stories_setup.js
-var stories = require("stories")
+var stories = require("api-stories")
 stories.before( function(driver) {
   driver
     .config({
@@ -129,7 +129,7 @@ contains your test files. stories.js starts in the folder of your test files, th
 ```js
 "use strict";
 
-var stories = require("stories"),
+var stories = require("api-stories"),
   _ = require("lodash"),
   assert = require("assert");
 
