@@ -99,9 +99,9 @@ Stories is only for testing JSON APIs.  That's it.  This focus has some benefits
 
 ### Streamlined API handling
 All tests are passed a ```driver``` that manages cookies for multiple users and makes stringing
-together many API calls pretty easy.  The driver also helps you deal with lags or eventual
-consistency: you just replace ```expect(...)``` with ```until(...)``` and the driver will
-poll instead of doing a single request.
+together many API calls while checking expectations pretty easy.  The driver also helps you deal
+with lags or eventual consistency: you just replace ```expect(...)``` with ```until(...)``` and
+the driver will poll instead of doing a single request.
 
 ### Generated documentation
 Stories can trace your API requests, dumping a JSON document containing all API activity organized by tests.  It is easy to render this dump and our team uses it as our API documentation.
