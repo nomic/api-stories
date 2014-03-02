@@ -115,12 +115,9 @@ integration tests tend to be made up of several steps, where later steps are dep
 the success of earlier steps.  This is quite different from unit tests, which, ideally, are
 short and test exactly one thing in isolation.
 
-So with stories you are writing higher level tests, and you can, optionally, break your tests
-into steps (and branches, which are a bit more experimental).  For example, as a first step
-a user might send an invitation.  Then, in the next step, another user can accept the invite.
-Finally, in the last step, the original user can check that they got notified about the invite
-being accepted.  (When you use branches, stories identifies all the unique paths through the test
-and runs each path in isolation, i.e., creates a fresh driver for each.)
+So with stories you can, optionally, break your test into steps.  (Branches are a bit experimental.
+When you use branches, stories identifies all the unique paths through the test and runs each path in
+isolation, i.e., creates a fresh driver for each.)
 
 ## Configuration example:
 A config file named ```stories_setup.js``` should be place somewhere above the folder that
