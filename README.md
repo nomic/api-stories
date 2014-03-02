@@ -24,7 +24,7 @@ suite("Invites", function() {
         .POST("/invites", {email: "ben@tester.com"})
         .expect(200, {
           email: "ben@tester.com",
-          code: /[a-z1-9]{32}/,
+          code: /[a-f1-9]{32}/,
           status: "pending"})
         .stash("invite");
     }),
