@@ -180,6 +180,8 @@ $ stories tests/*
 
 ### stories
 
+I recommend globalizing (I know, I know) the stories functions in your `stories_setup.js`.
+
 ```js
 suite("description", function() {
 
