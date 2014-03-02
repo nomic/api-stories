@@ -91,23 +91,25 @@ $ stories tests/*
 $ stories tests/* -o ../docs/transcripts
 ```
 
-This dumps a bunch of JSON.  Our team uses some trivial templates to render it, but
-that's not comitted to this repo yet.
-
+This dumps a JSON trace of all activity, organized by the test and step descriptions.  Our team
+uses some trivial templates to render it, but that's not comitted to this repo yet.
 
 ## Another testing framework?  Why?
 
-Stories is only for testing JSON APIs.  That's it.  This focus has some benefits.  All
-tests are passed a ```driver``` that manages cookies for multiple users and makes stringing
+Stories is only for testing JSON APIs.  That's it.  This focus has some benefits.
+
+### Streamlined API handling
+All tests are passed a ```driver``` that manages cookies for multiple users and makes stringing
 together many API calls pretty easy.  The driver also helps you deal with lags or eventual
 consistency: you just replace ```expect(...)``` with ```until(...)``` and the driver will
-poll instead of doing a single request.  And, stories can trace your API requests, dumping a JSON
-document containing all API activity organized by tests.  It is easy to render this
-dump and our team uses it as our API documentation.
+poll instead of doing a single request.
 
+### Generated documentation
+Stories can trace your API requests, dumping a JSON document containing all API activity organized by tests.  It is easy to render this dump and our team uses it as our API documentation.
+
+### Long tests, organized
 Similar to other automated test harnesses, stories allows you to break your tests up using
-the ```suite``` and ```test``` key words.  But stories adds two more directives:
-```step``` and ```branch```.
+the ```suite``` and ```test``` key words.  But stories adds two more directives: ```step``` and ```branch```.
 
 Step and branch are inspired by how use cases are structured.  Like use cases, high level
 integration tests tend to be made up of several steps, where later steps are dependent on
@@ -216,7 +218,6 @@ Additionally, a driver manages two very useful pieces of state:
 1. user sessions: http cookie collections tied to user aliases
 2. the stash: responses you save to use in later requests
 
-
 #### .introduce(name)
 
 Introduce an actor.  Under the hood, creates a new cookie collection, assigns it to that name, and sets it as the current cookie colleciton for subsequent requests.
@@ -263,8 +264,13 @@ but you are not depent upon a returned value, you can use wait().  Requests afte
 
 #### .expect([statusCode], [fn | jsonExpression]);
 
-##### fn
-If using a custom fn, it must return a truthy to pass, and return a falsey or throw an exception to fail.
+##### fn(result)
+If using a custom fn, it must return a truthy to pass, and return a falsey or throw an exception to fail.  The result obect has the following keys:
+
+* json: http response body parsed as json
+* text: http response body as a string
+* headers: http response headers
+* statusCode: http status code
 
 ##### jsonExpressions
 * The default behavior for a json expression is to check that the response has *at least* the specified values, i.e. the expectation does not need to include all of the responses values
