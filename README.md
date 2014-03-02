@@ -19,7 +19,7 @@ suite("Invites", function() {
 
   test("Send an invite and respond to it",
 
-    step("Send invite", function(driver) {
+    step("Mia sends an invite to Ben", function(driver) {
       driver
         .as("mia")
         .POST("/invites", {email: "ben@tester.com"})
@@ -30,7 +30,7 @@ suite("Invites", function() {
         .stash("invite");
     }),
 
-    step("Can't send another invite to same email", function(driver) {
+    step("Mia can't send the same invite again", function(driver) {
       driver
         .as("mia")
         .POST("/invites", {to: ":invite.email"})
@@ -38,7 +38,7 @@ suite("Invites", function() {
     }),
 
     branch(
-      step("Accept invite", function(driver) {
+      step("Ben accepts the invite", function(driver) {
         driver
           .introduce("ben")
           .POST("/invites/:invite.code/accept")
@@ -51,7 +51,7 @@ suite("Invites", function() {
     ),
 
     branch(
-      step("Decline invite", function(driver) {
+      step("Ben declines the invite", function(driver) {
         driver
           .introduce("ben")
           .POST("/invites/:invite.code/decline"})
