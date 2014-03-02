@@ -9,55 +9,54 @@ suite("Invites", function() {
 
   before(function(driver) {
     driver
-    .as("admin")
-    .POST("/user", {handle: "mia", password: "abc123"})
-    .wait()
-    .introduce("mia")
-    .POST("/auth", {handle: "mia", password:"abc123"});
+      .as("admin")
+      .POST("/user", {handle: "mia", password: "abc123"})
+      .wait()
+      .introduce("mia")
+      .POST("/auth", {handle: "mia", password:"abc123"});
   });
 
   test("Send an invite and respond to it",
 
     step("Send invite", function(driver) {
       driver
-      .as("mia")
-      .POST("/invites", {email: "ben@tester.com"})
-      .expect(200, {
-        email: "ben@tester.com",
-        code: /[a-z1-9]{32}/,
-        status: "pending"})
-      .stash("invite");
+        .as("mia")
+        .POST("/invites", {email: "ben@tester.com"})
+        .expect(200, {
+          email: "ben@tester.com",
+          code: /[a-z1-9]{32}/,
+          status: "pending"})
+        .stash("invite");
     }),
 
     step("Can't send another invite to same email", function(driver) {
       driver
-      .as("mia")
-      .POST("/invites", {to: ":invite.email"})
-      .expect(400, {reason: "$exists"});
+        .as("mia")
+        .POST("/invites", {to: ":invite.email"})
+        .expect(400, {reason: "$exists"});
     }),
 
     branch(
       step("Accept invite", function(driver) {
         driver
-        .introduce("ben")
-        .POST("/invites/:invite.code/accept")
-        .expect(200)
-        .as("mia")
-        .GET("/invites?status=accepted")
-        .until(200, {$length: 1})
+          .introduce("ben")
+          .POST("/invites/:invite.code/accept")
+          .expect(200)
+          .as("mia")
+          .GET("/invites?status=accepted")
+          .until(200, {$length: 1})
       })
     ),
 
     branch(
       step("Decline invite", function(driver) {
-
         driver
-        .introduce("ben")
-        .POST("/invites/decline", {code: ":invite.code"})
-        .expect(200)
-        .as("mia")
-        .GET("/invites?status=accepted")
-        .never(200, {$length: 1})
+          .introduce("ben")
+          .POST("/invites/decline", {code: ":invite.code"})
+          .expect(200)
+          .as("mia")
+          .GET("/invites?status=accepted")
+          .never(200, {$length: 1})
       })
     ),
 
@@ -78,9 +77,9 @@ $ cat > stories_setup.js
 var stories = require("stories")
 stories.before( function(driver) {
   driver
-  .config({
-    requestEndpoint: "http://localhost:3000",
-  })
+    .config({
+      requestEndpoint: "http://localhost:3000",
+    })
 });
 $ stories tests/*
 ```
