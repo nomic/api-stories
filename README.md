@@ -209,6 +209,7 @@ suite("description", function() {
 ```
 
 ### driver
+[driver github repo](https://github.com/nomic/api-driver)
 
 The driver makes it easy to call your api and check expectations.
 
