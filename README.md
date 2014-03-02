@@ -33,7 +33,7 @@ suite("Invites", function() {
       driver
         .as("mia")
         .POST("/invites", {to: ":invite.email"})
-        .expect(400, {reason: "$exists"});
+        .expect(400);
     }),
 
     branch(
