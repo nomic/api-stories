@@ -1,4 +1,4 @@
-# api-stories.js
+# Stories
 
 JSON API testing without the fuss.
 
@@ -7,59 +7,63 @@ JSON API testing without the fuss.
 ```js
 suite("Invites", function() {
 
-    before(function(driver) {
-        // Good idea to create helpers for the really common
-        // setup stuff.
-        helpers.setupUsers(driver, ["mia", "ben"]);
-    });
+  before(function(driver) {
+    driver
+    .as("admin")
+    .POST("/user", {handle: "mia", password: "abc123"})
+    .wait()
+    .introduce("mia")
+    .POST("/auth", {handle: "mia", password:"abc123"});
+  });
 
-    test("Send an invite and respond to it",
+  test("Send an invite and respond to it",
 
-        step("Send invite", function(driver) {
+    step("Send invite", function(driver) {
+      driver
+      .as("mia")
+      .POST("/invites", {email: "ben@tester.com"})
+      .expect(200, {
+        email: "ben@tester.com",
+        code: /[a-z1-9]{32}/,
+        status: "pending"})
+      .stash("invite");
+    }),
 
-            driver
-            .as("mia")
-            .POST("/invites", {to: ":ben.name"})
-            .expect(200, {to: ":ben.name"})
-            .stash("invite");
-        }),
+    step("Can't send another invite to same email", function(driver) {
+      driver
+      .as("mia")
+      .POST("/invites", {to: ":invite.email"})
+      .expect(400, {reason: "$exists"});
+    }),
 
-        step("Receive invite", function(driver) {
+    branch(
+      step("Accept invite", function(driver) {
+        driver
+        .introduce("ben")
+        .POST("/invites/:invite.code/accept")
+        .expect(200)
+        .as("mia")
+        .GET("/invites?status=accepted")
+        .until(200, {$length: 1})
+      })
+    ),
 
-            driver
-            .as("ben")
-            .GET("/invites/to/:ben.id")
-            .until(200, [{code: "$exists", from: ":mia.id"}])
-            .GET("/invites/to/:ben.id?status=accepted")
-            .expect(200, {$length: 0})
+    branch(
+      step("Decline invite", function(driver) {
 
-        }),
+        driver
+        .introduce("ben")
+        .POST("/invites/decline", {code: ":invite.code"})
+        .expect(200)
+        .as("mia")
+        .GET("/invites?status=accepted")
+        .never(200, {$length: 1})
+      })
+    ),
 
-        branch(
-            step("Accept invite", function(driver) {
+  ));
 
-                driver
-                .as("ben")
-                .POST("/invites/accept", {code: ":invite.code"})
-                .expect(204)
-                .GET("/invites/to/:ben.id?status=accepted")
-                .expect(200, {$length: 1})
-            })
-        ),
-
-        branch(
-            step("Decline invite", function(driver) {
-
-                driver
-                .as("ben")
-                .POST("/invites/decline", {code: ":invite.code"})
-                .expect(204)
-            })
-        ),
-
-    ));
-    
-    // more invite tests can be added to the suite here...
+  // more invite tests can be added to the suite here...
 
 });
 
@@ -73,24 +77,33 @@ $ stories --help
 $ cat > stories_setup.js
 var stories = require("stories")
 stories.before( function(driver) {
-    driver
-        .config({
-            requestEndpoint: "http://localhost:3000",
-        })
+  driver
+  .config({
+    requestEndpoint: "http://localhost:3000",
+  })
 });
-$ stories tests/* 
+$ stories tests/*
 ```
+
+## Generate a trace to use as API documentation
+
+```bash
+$ stories tests/* -o ../docs/transcripts
+```
+
+This dumps a bunch of JSON.  Our team uses some trivial templates to render it, but
+that's not comitted to this repo yet.
+
 
 ## Another testing framework?  Why?
 
-api-stories.js is only for testing JSON APIs.  That's it.  This focus has some benefits.  All
+Stories is only for testing JSON APIs.  That's it.  This focus has some benefits.  All
 tests are passed a ```driver``` that manages cookies for multiple users and makes stringing
-together many API calls relatively easy.  The driver also makes dealing with lags or eventual
-consistency pretty easy: you just replace ```expect(...)``` with ```until(...)``` and the driver will
+together many API calls pretty easy.  The driver also helps you deal with lags or eventual
+consistency: you just replace ```expect(...)``` with ```until(...)``` and the driver will
 poll instead of doing a single request.  And, stories can trace your API requests, dumping a JSON
-document containing all API activity organized by test.  It is easy to render this
-dump and our team uses it as our API documentation (the rendering app is pretty basic, but is not
-yet part of this github repo).
+document containing all API activity organized by tests.  It is easy to render this
+dump and our team uses it as our API documentation.
 
 Similar to other automated test harnesses, stories allows you to break your tests up using
 the ```suite``` and ```test``` key words.  But stories adds two more directives:
@@ -98,30 +111,28 @@ the ```suite``` and ```test``` key words.  But stories adds two more directives:
 
 Step and branch are inspired by how use cases are structured.  Like use cases, high level
 integration tests tend to be made up of several steps, where later steps are dependent on
-the success of earlier steps.  This is quite different from unit tests which, ideally, are
+the success of earlier steps.  This is quite different from unit tests, which, ideally, are
 short and test exactly one thing in isolation.
 
 So with stories you are writing higher level tests, and you can, optionally, break your tests
 into steps (and branches, which are a bit more experimental).  For example, as a first step
-a user might send an invitation.  Then, in the next step, another user can accept the invite. 
+a user might send an invitation.  Then, in the next step, another user can accept the invite.
 Finally, in the last step, the original user can check that they got notified about the invite
-being accepted.
+being accepted.  (When you use branches, stories identifies all the unique paths through the test
+and runs each path in isolation, i.e., creates a fresh driver for each.)
 
 ## Configuration example:
 A config file named ```stories_setup.js``` should be place somewhere above the folder that
-contains your test files.  api-stories.js starts in the folder of your test files, then traverses to root looking for it.  Here's an example from a real project:
+contains your test files. stories.js starts in the folder of your test files, then traverses to root looking for it.  Here's an example from a real project:
 
 ```js
 "use strict";
 
 var stories = require("stories"),
-    _ = require("lodash"),
-    assert = require("assert");
-
-_.mixin(require("underscore.string").exports());
+  _ = require("lodash"),
+  assert = require("assert");
 
 // Make these global for convenience.  Not required.
-global.suite = stories.suite;
 global.test = stories.test;
 global.step = stories.step;
 global.branch = stories.branch;
@@ -130,35 +141,30 @@ global.after = stories.after;
 
 require("http").globalAgent.maxSockets = 20;
 
-// If no expectation or until clause is specified,
-// expect that we at least get a 2xx code.
+// If no expectation is specified, default to expecting a 2xx code
 function defaultExpectation(result) {
-    assert(
-      [200, 201, 202, 203, 204].indexOf(result.statusCode) !== -1,
-      "Expectd 2xx status code by default, but got: " + result.statusCode +
-      "\nResponse Body:\n"+JSON.stringify(result.json, null, 4)
-    );
-    return true;
+  assert(
+    [200, 201, 202, 203, 204].indexOf(result.statusCode) !== -1,
+    "Expectd 2xx status code by default, but got: " + result.statusCode +
+    "\nResponse Body:\n"+JSON.stringify(result.json, null, 4)
+  );
+  return true;
 }
-
-// Setup the default directory for data files.
-// The driver's upload command will look here.
-// drive.config.data = __dirname + "/../data";
 
 // Run this before every path of every suite.
 stories.before( function(driver) {
-    driver
-        .config({
-            requestEndpoint: "http://localhost:3100/api",
-            defaultExpectation: defaultExpectation
-        })
-        .introduce("admin")
-        .GET("/test/reset_elastic_search")
-        .GET("/test/reset_database")
-        .GET("/test/reset_caches/")
-        .wait()
-        .POST("/auth/form", {"handle": "roboto", "password": "abc1234"})
-        .stash("admin");
+  driver
+    .config({
+      requestEndpoint: "http://localhost:3100/api",
+      defaultExpectation: defaultExpectation
+    })
+    .introduce("admin")
+    .GET("/test/reset_elastic_search")
+    .GET("/test/reset_database")
+    .GET("/test/reset_caches/")
+    .wait()
+    .POST("/auth/form", {"handle": "roboto", "password": "abc1234"})
+    .stash("admin");
 });
 ```
 
@@ -166,20 +172,44 @@ stories.before( function(driver) {
 
 ```bash
 $ ./stories --help
-```
-
-### An example invocation
-
-```bash
 $ stories tests/*
 ```
 
+## Reference
 
-## Driver
+### stories
 
-Each story or step is passed a driver.
+```js
+suite("description", function() {
 
-A driver makes it easy to call your api and check expectations.
+  before(function(driver) {
+    //...
+  });
+
+  after(function(driver) {
+    //...
+  });
+
+  //simple test
+  test("description", function(driver) {
+    //...
+  });
+
+  //multi step test
+  test("description",
+    step( "description", function(driver) {
+      //...
+    }),
+    step( "description", function(driver) {
+      //...
+    })
+  );
+});
+```
+
+### driver
+
+The driver makes it easy to call your api and check expectations.
 
 Additionally, a driver manages two very useful pieces of state:
 
@@ -187,15 +217,15 @@ Additionally, a driver manages two very useful pieces of state:
 2. the stash: responses you save to use in later requests
 
 
-### .introduce(name)
+#### .introduce(name)
 
 Introduce an actor.  Under the hood, creates a new cookie collection, assigns it to that name, and sets it as the current cookie colleciton for subsequent requests.
 
-### .as(name)
+#### .as(name)
 
 Switch the current actor.  Under the hood, this just switches the current cookie collection.  Must intrdoduce an actor first.
 
-### Http methods
+#### http methods
 ```
    .GET(url, headers)
 .DELETE(url, headers)
@@ -205,7 +235,7 @@ Switch the current actor.  Under the hood, this just switches the current cookie
   .POST(url, body, headers)
 ```
 
-### .stash()
+#### .stash()
 Any result can be stashed, e.g.:
 
 ```js
@@ -226,14 +256,18 @@ You can use these ":" names in urls, request bodies, and expectations.
 The stash is also a nice way to ensure that an operation does not run until some result it needs is
 available.  An operation just waits until the stashed result has been fulfilled.
 
-### .wait([millis])
-By default, driver executes all of your requests in parallel.  Often a request will automatically block because it needs a stashed variable from a previous requests.  However, other times you just need to say wait() if there is no such var that it makes sense to block on.  Requests after a wait() won't fire untill all previous requests have returned.  You can also specify an *additional* number of millis to wait for.
+#### .wait([millis])
+By default, driver executes all of your requests in parallel.  A request will automatically block if it depends on a stashed value.  However, when you need to wait for some previous request to complete
+but you are not depent upon a returned value, you can use wait().  Requests after a wait() won't fire untill all previous requests have returned.  You can also specify an *additional* number of millis to wait for, but this is generally a brittle approach to handling lags (see until() below).
 
 
-### .expect([statusCode], [fn | jsonExpression]);
-* If using a custom fn, it must return a truthy to pass, and return a falsey or throw an exception to fail.
-* The default behavior for a json expression is to check that the response has *at least* the specified values,
-  i.e. the expectation does not need to include all of the responses values
+#### .expect([statusCode], [fn | jsonExpression]);
+
+##### fn
+If using a custom fn, it must return a truthy to pass, and return a falsey or throw an exception to fail.
+
+##### jsonExpressions
+* The default behavior for a json expression is to check that the response has *at least* the specified values, i.e. the expectation does not need to include all of the responses values
 * `$unordered`: Replace an [1,2,3] with {$unordered: [1, 2, 3]} if you do not care about the order of the result
 * `$length`: Replace [1,2,3] with {$length: 3} if all you care about is length
 * `{key: "$not-exists"}` and `{key: "$exists"}`: insure the specified field is not present or is present
@@ -242,16 +276,16 @@ By default, driver executes all of your requests in parallel.  Often a request w
 * `$gt`, `$gte`, `$lt`, `$lte`
 * Check out [expector.js](https://github.com/nomic/api-driver/blob/master/lib/expector.js) to find all the special '$' keywords.
 
-### .until()
+#### .until([statusCode], [fn | jsonExpression], [millis])
 
-* .until(..., [millis]) works exactly like .expect(...), only it will repeat the previous api call
-  *until* the stated condition is met, or give up after 10 seconds (not configurable yet) or the
-  specified time.  It's not recommended to specify millis, except when initially setting up
-  the test.  If you try to give up fast, you'll end up with intermittent test failures, which are
-  the worst kind of failures.
+Works exactly like .expect(...), only it will repeat the previous api call
+*until* the stated condition is met, or give up after 10 seconds or the
+specified time.  It's not recommended to specify millis, except when initially setting up
+the test.
 
-### .never()
+#### .never([statusCode], [fn | jsonExpression], [millis])
 
-* .never(..., [millis]) ensures that some expectation "never" comes to be, or at least doesn't happen
-for a while... By default it waits 10 seconds.  (This can make testing take painfully long.  Need to
-come up with a way to unblock future tests while leaving a never check active in the background.)
+Ensure that an expectation "never" comes to be, or at least doesn't happen
+for a while... By default it waits 10 seconds.  (This can make testing take painfully long...
+Would be nice if never tests could run in the background and not block the next test, but this
+won't work if you are clearing your server state between tests.)
