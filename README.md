@@ -11,7 +11,6 @@ suite("Invites", function() {
     driver
       .as("admin")
       .POST("/user", {handle: "mia", password: "abc123"})
-
       .wait()
       .introduce("mia")
       .POST("/auth", {handle: "mia", password:"abc123"});
@@ -43,7 +42,6 @@ suite("Invites", function() {
           .introduce("ben")
           .POST("/invites/:invite.code/accept")
           .expect(200)
-
           .as("mia")
           .GET("/invites?status=accepted")
           .until(200, {$length: 1})
@@ -56,7 +54,6 @@ suite("Invites", function() {
           .introduce("ben")
           .POST("/invites/:invite.code/decline"})
           .expect(200)
-
           .as("mia")
           .GET("/invites?status=accepted")
           .never(200, {$length: 1})
