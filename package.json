@@ -29,7 +29,6 @@
     "api-driver": "nomic/api-driver",
     "commander": "2.0.0",
     "minimatch": "0.2.12",
-    "request": "2.26.0",
     "underscore": "1.5.1"
   }
 }
