@@ -26,7 +26,7 @@
   "homepage": "https://github.com/nomic/api-stories",
   "dependencies": {
     "async": "0.2.9",
-    "api-driver": "0.0.5",
+    "api-driver": "0.0.6",
     "commander": "2.0.0",
     "minimatch": "0.2.12",
     "underscore": "1.5.1"
