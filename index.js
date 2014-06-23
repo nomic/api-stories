@@ -157,8 +157,13 @@ Topic.prototype.run = function(pathPatterns, before, after, stories, reporter, p
                 });
 
             } catch (e) {
-                pathReporter(e, "");
-                cb();
+                //FIXME: driver shouldn't keep running if there is an exception
+                //       but it does, so calling driver.results is the best way
+                //       to clean out any registered http requests.
+                driver.results( function() {
+                    pathReporter(e, "");
+                    cb();
+                });
             }
         }, function() {
 
