@@ -1,6 +1,6 @@
 {
   "name": "api-stories",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "\"JSON API testing without the fuss\"",
   "keywords": [
     "testing",
@@ -15,7 +15,7 @@
     "type": "git",
     "url": "https://github.com/nomic/api-stories.git"
   },
-  "bin" : {
+  "bin": {
     "stories": "./index.js"
   },
   "author": "Aaron Boyd",
@@ -25,7 +25,7 @@
   },
   "homepage": "https://github.com/nomic/api-stories",
   "dependencies": {
-    "api-driver": "0.0.6",
+    "api-driver": "0.0.7",
     "async": "0.2.9",
     "commander": "2.0.0",
     "minimatch": "0.2.12",
