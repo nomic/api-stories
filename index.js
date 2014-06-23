@@ -404,7 +404,7 @@ if (! module.parent) {
 
             // called for each path
             function(err, path, expectationResults) {
-                if (err || expectationResults.expectationsFailed) {
+                if (err || expectationResults.err) {
                     //it's an error
                     console.log("  XX: " + path);
                     console.log();
@@ -417,7 +417,7 @@ if (! module.parent) {
                 }
                 if (expectationResults) {
                     expectationsPassed += expectationResults.expectationsPassed;
-                    expectationsFailed += expectationResults.expectationsFailed;
+                    expectationsFailed += expectationResults.err ? 1 : 0;
                 }
             },
             function(transcript) {
