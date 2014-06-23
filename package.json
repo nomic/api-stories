@@ -25,10 +25,11 @@
   },
   "homepage": "https://github.com/nomic/api-stories",
   "dependencies": {
-    "async": "0.2.9",
     "api-driver": "0.0.6",
+    "async": "0.2.9",
     "commander": "2.0.0",
     "minimatch": "0.2.12",
+    "request": "2.26.0",
     "underscore": "1.5.1"
   }
 }
