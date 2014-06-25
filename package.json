@@ -1,6 +1,6 @@
 {
   "name": "api-stories",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "\"JSON API testing without the fuss\"",
   "keywords": [
     "testing",
@@ -25,7 +25,7 @@
   },
   "homepage": "https://github.com/nomic/api-stories",
   "dependencies": {
-    "api-driver": "0.0.8",
+    "api-driver": "0.0.9",
     "async": "0.2.9",
     "commander": "2.0.0",
     "minimatch": "0.2.12",
